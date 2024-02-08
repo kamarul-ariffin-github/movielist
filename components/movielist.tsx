@@ -9,12 +9,13 @@ export default function MovieList() {
     const [moviesGenres, setMoviesGenres] = useState<any[]>([])
     const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
     const [selectedRatings, setSelectedRatings] = useState<number>(10)
-    const [selectedSortBy, setSelectedSortBy] = useState<string>("popularity.desc");
+    const [selectedSortBy, setSelectedSortBy] = useState<string>("popularity");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [selectedMovie, setSelectedMovie] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [order, setOrder] = useState(".desc")
 
     const fetchMovies = async (page: any) => {
         setLoading(true);
@@ -31,13 +32,13 @@ export default function MovieList() {
         };
         try {
             const response = await fetch(
-                `https://api.themoviedb.org/3/discover/movie?language=en-US&page=${page}${sortby}${genreQuery}${ratingQuery}`,
+                `https://api.themoviedb.org/3/discover/movie?language=en-US&page=${page}${sortby}${order}${genreQuery}${ratingQuery}`,
                 options
             );
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
+                // console.log(data);
                 setMovies(data.results);
                 setTotalPages(data.total_pages);
             } else {
@@ -64,7 +65,7 @@ export default function MovieList() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
+                // console.log(data);
                 setSelectedMovie(data)
             } else {
                 console.log(response);
@@ -88,7 +89,7 @@ export default function MovieList() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log("genres: ", data);
+                // console.log("genres: ", data);
                 setMoviesGenres(data.genres);
             } else {
                 console.log(response);
@@ -100,7 +101,7 @@ export default function MovieList() {
 
     useEffect(() => {
         fetchMovies(currentPage);
-    }, [currentPage, selectedGenres, selectedRatings, selectedSortBy]);
+    }, [currentPage, selectedGenres, selectedRatings, selectedSortBy, order]);
 
     useEffect(() => {
         fetchMoviesGenres()
@@ -128,12 +129,12 @@ export default function MovieList() {
                 return [...prevGenres, genreId];
             }
         });
-        console.log(selectedGenres)
+        // console.log(selectedGenres)
     };
 
     const handleRatingChange = (rating: number) => {
         setSelectedRatings(rating);
-        console.log(rating);
+        // console.log(rating);
     };
 
     const handleSortByChange = (value: string) => {
@@ -240,18 +241,30 @@ export default function MovieList() {
                             </DialogPanel>
                         </Dialog>
                         <div className="flex items-center gap-1">
-                            <p className=" font-bold">Sort By</p>
+                            {/* <p className=" font-bold">Sort By</p> */}
                             <div>
                                 <Select value={selectedSortBy} onValueChange={(value: string) => handleSortByChange(value)} >
-                                    <SelectItem value="popularity.desc">Popularity Descending</SelectItem>
-                                    <SelectItem value="popularity.asc">Popularity Ascending</SelectItem>
-                                    <SelectItem value="original_title.desc">Title Descending</SelectItem>
-                                    <SelectItem value="original_title.asc">Title Ascending</SelectItem>
-                                    <SelectItem value="release_date.desc">Release Date Descending</SelectItem>
-                                    <SelectItem value="release_date.asc">Release Date Ascending</SelectItem>
-                                    <SelectItem value="vote_average.desc">Rating Descending</SelectItem>
-                                    <SelectItem value="vote_average.asc">Rating Ascending</SelectItem>
+                                    <SelectItem value="popularity">Popularity</SelectItem>
+                                    <SelectItem value="original_title">Title</SelectItem>
+                                    <SelectItem value="release_date">Release Date</SelectItem>
+                                    <SelectItem value="vote_average">Rating</SelectItem>
                                 </Select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-1 mx-2">
+                                <span title="Sort ascending">
+                                    <i onClick={() => setOrder(".asc")} className="cursor-pointer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor" className={`w-4 h-4 m-0 p-0 hover:text-gray-600 ${order === ".asc" ? 'text-gray-900' : ' text-gray-400'}`}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+                                        </svg>
+                                    </i>
+                                </span>
+                                <span title="Sort descending">
+                                    <i onClick={() => setOrder(".desc")} className="cursor-pointer">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor" className={`w-4 h-4 m-0 p-0 hover:text-gray-600 ${order === ".desc" ? 'text-gray-900' : ' text-gray-400'}`}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                        </svg>
+                                    </i>
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -297,43 +310,50 @@ export default function MovieList() {
                                 </div>
                             )}
                             {selectedMovie && (
-                                <Dialog open={true} onClose={() => setSelectedMovie(null)} static={true}>
-                                    <DialogPanel>
-                                        <div className="p-4 max-w-md mx-auto rounded-lg">
-                                            <h2 className="text-lg font-bold">{selectedMovie.title}</h2>
-                                            <p className="mt-1 font-medium">Release Date:
-                                                <span className="font-normal inline-block ml-1">
-                                                    {selectedMovie.release_date}
-                                                </span>
-                                            </p>
-                                            <p className="mt-1 font-medium">Synopsis:
-                                                <span className=" font-normal block">
-                                                    {selectedMovie.overview}
-                                                </span>
-                                            </p>
-                                            <p className="mt-1 font-medium">Cast:</p>
-                                            <ul className="grid grid-cols-2 gap-4">
-                                                {selectedMovie.credits?.cast.slice(0, 10).map((castMember: any) => (
-                                                    <li key={castMember.id} className="flex items-center mb-2">
-                                                        <img
-                                                            src={`https://image.tmdb.org/t/p/w200${castMember.profile_path}`}
-                                                            alt={castMember.name}
-                                                            className=" w-14 h-14 mr-2 rounded-full object-cover"
-                                                        />
-                                                        <div>
-                                                            <p className="font-semibold">{castMember.name}</p>
-                                                            <p className="text-sm">{castMember.character}</p>
-                                                        </div>
-                                                    </li>
-                                                ))}
-                                                {selectedMovie.credits?.cast.length > 10 && <li>and more...</li>}
-                                            </ul>
+                                <Dialog open={true} onClose={() => setSelectedMovie(null)} static={true} >
+                                    <DialogPanel className=" md:min-w-[90%]" >
+                                        <div className="w-full flex justify-end">
+                                            <i onClick={() => setSelectedMovie(null)}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 hover:text-red-500">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                                </svg>
+                                            </i>
                                         </div>
-                                        <div className="mt-3 w-full text-right">
-                                            <Button variant="light" onClick={() => setSelectedMovie(null)}>
-                                                Close
-                                            </Button>
+                                        <div className="p-4 pt-0 rounded-lg md:grid md:grid-cols-2">
+                                            <div>
+                                                <h2 className="text-lg font-bold">{selectedMovie.title}</h2>
+                                                <p className="mt-1 font-medium">Release Date:
+                                                    <span className="font-normal inline-block ml-1">
+                                                        {selectedMovie.release_date}
+                                                    </span>
+                                                </p>
+                                                <p className="mt-1 font-medium">Synopsis:
+                                                    <span className=" font-normal block">
+                                                        {selectedMovie.overview}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="mt-1 font-medium">Cast:</p>
+                                                <ul className="grid grid-cols-2 gap-4">
+                                                    {selectedMovie.credits?.cast.slice(0, 10).map((castMember: any) => (
+                                                        <li key={castMember.id} className="flex items-center mb-2">
+                                                            <img
+                                                                src={`https://image.tmdb.org/t/p/w200${castMember.profile_path}`}
+                                                                alt={castMember.name}
+                                                                className=" w-14 h-14 mr-2 rounded-full object-cover"
+                                                            />
+                                                            <div>
+                                                                <p className="font-semibold">{castMember.name}</p>
+                                                                <p className="text-sm">{castMember.character}</p>
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                    {selectedMovie.credits?.cast.length > 10 && <li>and more...</li>}
+                                                </ul>
+                                            </div>
                                         </div>
+
                                     </DialogPanel>
                                 </Dialog>
                             )}
