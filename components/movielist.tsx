@@ -193,6 +193,13 @@ export default function MovieList() {
                         <Button className="md:hidden" onClick={() => setIsFilterOpen(true)} variant="secondary" size="xs" color="sky">Filter By</Button>
                         <Dialog open={isFilterOpen} onClose={(val) => setIsFilterOpen(val)} static={true}>
                             <DialogPanel>
+                                <div className="w-full flex justify-end">
+                                    <i onClick={() => setIsFilterOpen(false)}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 hover:text-red-500">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                    </i>
+                                </div>
                                 <div >
                                     <p className="font-bold text-lg mb-1">FILTER BY</p>
                                     {/* Your filter options go here */}
@@ -233,11 +240,11 @@ export default function MovieList() {
                                         )).reverse()}
                                     </div>
                                 </div>
-                                <div className="mt-3 text-right">
+                                {/* <div className="mt-3 text-right">
                                     <Button variant="light" onClick={() => setIsFilterOpen(false)}>
                                         Close
                                     </Button>
-                                </div>
+                                </div> */}
                             </DialogPanel>
                         </Dialog>
                         <div className="flex items-center gap-1">
