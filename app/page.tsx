@@ -3,6 +3,7 @@ import Header from "@/components/header";
 import { Button, Dialog, DialogPanel, Select, SelectItem } from "@tremor/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { BeatLoader } from "react-spinners";
 
 export default function Home() {
   const [movies, setMovies] = useState<any[]>([]);
@@ -12,10 +13,12 @@ export default function Home() {
   const [selectedSortBy, setSelectedSortBy] = useState<string>("popularity.desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [isOpen, setIsOpen] = useState(false)
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const fetchMovies = async (page: any) => {
+    setLoading(true);
     const genreQuery = selectedGenres.length > 0 ? `&with_genres=${selectedGenres.join(",").replace(/,/g, "%2C")}` : "";
     const ratingQuery = selectedRatings !== 10 ? `&vote_average.lte=${selectedRatings}` : "";
     const sortby = `&sort_by=${selectedSortBy}`;
@@ -43,6 +46,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error("Error fetching popular movies:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -105,14 +110,14 @@ export default function Home() {
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -145,8 +150,8 @@ export default function Home() {
     <>
       <Header />
       <div className=" p-2 ">
-        <div className="flex flex-row gap-5">
-          <div className="border-2 p-2">
+        <div className="flex flex-row gap-5 justify-center">
+          <div className="border-2 p-2 hidden md:inline">
             <p className=" font-bold text-lg mb-1">FILTER BY</p>
             <p className=" font-semibold">Genres</p>
             {moviesGenres.map((genre) => (
@@ -185,8 +190,58 @@ export default function Home() {
               )).reverse()}
             </div>
           </div>
-          <div>
-            <div className=" w-full mb-2 flex gap-1 items-center justify-end">
+          <div className="flex-1">
+            <div className=" w-full mb-2 flex gap-1 items-center md:justify-end justify-between">
+              {/* mobile view filter */}
+              <Button className="md:hidden" onClick={() => setIsFilterOpen(true)} variant="secondary" size="xs" color="sky">Filter By</Button>
+              <Dialog open={isFilterOpen} onClose={(val) => setIsFilterOpen(val)} static={true}>
+                <DialogPanel>
+                  <div >
+                    <p className="font-bold text-lg mb-1">FILTER BY</p>
+                    {/* Your filter options go here */}
+                    <p className="font-semibold">Genres</p>
+                    <div className="grid grid-cols-2">
+                      {moviesGenres.map((genre) => (
+                        <label key={genre.id} className="flex items-center">
+                          <input
+                            type="checkbox"
+                            value={genre.id}
+                            checked={selectedGenres.includes(genre.id)}
+                            onChange={() => handleGenreChange(genre.id)}
+                            className="mr-2"
+                          />
+                          {genre.name}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="font-semibold mt-1">Ratings</p>
+                    <div className="grid grid-cols-2 gap-1">
+                      {[...Array(10)].map((_, index) => (
+                        <label key={index} className="flex items-center">
+                          <input
+                            type="radio"
+                            name="rating"
+                            value={index + 1}
+                            onChange={() => handleRatingChange(index + 1)}
+                            className="mr-1"
+                          />
+                          {index + 1}
+                          <i >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 text-yellow-500">
+                              <path fillRule="evenodd" d="M8 1.75a.75.75 0 0 1 .692.462l1.41 3.393 3.664.293a.75.75 0 0 1 .428 1.317l-2.791 2.39.853 3.575a.75.75 0 0 1-1.12.814L7.998 12.08l-3.135 1.915a.75.75 0 0 1-1.12-.814l.852-3.574-2.79-2.39a.75.75 0 0 1 .427-1.318l3.663-.293 1.41-3.393A.75.75 0 0 1 8 1.75Z" clipRule="evenodd" />
+                            </svg>
+                          </i>
+                        </label>
+                      )).reverse()}
+                    </div>
+                  </div>
+                  <div className="mt-3 text-right">
+                    <Button variant="light" onClick={() => setIsFilterOpen(false)}>
+                      Close
+                    </Button>
+                  </div>
+                </DialogPanel>
+              </Dialog>
               <p className=" font-bold">Sort By</p>
               <div>
                 <Select value={selectedSortBy} onValueChange={(value: string) => handleSortByChange(value)} >
@@ -202,72 +257,95 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 h-fit">
-              {movies.map((movie) => (
-                <div
-                  key={movie.id}
-                  className="shadow-md border p-2 hover:scale-110 transform transition duration-300"
-                  onClick={() => fetchMovieDetails(movie.id)}
-                >
-                  <div className="">
-                    <Image
-                      loader={imageLoader}
-                      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                      alt={movie.title}
-                      width={500}
-                      height={300}
-                      layout="responsive"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-
-                    />
-
-                    {/* <img
-                      src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                      alt={movie.title}
-                      className="w-full h-auto object-fill"
-                    /> */}
+            {loading ? (
+              <div className="flex justify-center my-10 h-full">
+                <BeatLoader
+                  color="#7dd3fc" loading={true}
+                />
+              </div>
+            ) : (
+              <>
+                {movies.length === 0 ? (
+                  <div className="flex justify-center my-10 h-full">
+                    <p>No movies found.</p>
                   </div>
-                  <p className="text-lg font-bold">{movie.title}</p>
-                  <p>Release Date: {movie.release_date}</p>
-                </div>
-              ))}
-            </div>
-            {selectedMovie && (
-              <Dialog open={true} onClose={() => setSelectedMovie(null)} static={true}>
-                <DialogPanel>
-                  <div className="p-4 max-w-md mx-auto rounded-lg">
-                    <h2 className="text-lg font-bold">{selectedMovie.title}</h2>
-                    <p>Release Date: {selectedMovie.release_date}</p>
-                    <p>Synopsis: {selectedMovie.overview}</p>
-                    <p>Cast:</p>
-                    <ul className="grid grid-cols-2 gap-4">
-                      {selectedMovie.credits?.cast.slice(0, 10).map((castMember: any) => (
-                        <li key={castMember.id} className="flex items-center mb-2">
-                          <img
-                            src={`https://image.tmdb.org/t/p/w200${castMember.profile_path}`}
-                            alt={castMember.name}
-                            className=" w-14 h-14 mr-2 rounded-full object-cover"
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 h-fit">
+                    {movies.map((movie) => (
+                      <div
+                        key={movie.id}
+                        className="shadow-md border p-2 hover:scale-105 hover:md:scale-110 transform transition duration-300"
+                        onClick={() => fetchMovieDetails(movie.id)}
+                      >
+                        <div className="">
+                          <Image
+                            loader={imageLoader}
+                            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                            alt={movie.title}
+                            width={500}
+                            height={300}
+                            layout="responsive"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
-                          <div>
-                            <p className="font-semibold">{castMember.name}</p>
-                            <p className="text-sm">{castMember.character}</p>
-                          </div>
-                        </li>
-                      ))}
-                      {selectedMovie.credits?.cast.length > 10 && <li>and more...</li>}
-                    </ul>
+                          {/* <img
+                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                alt={movie.title}
+                className="w-full h-auto object-fill"
+              /> */}
+                        </div>
+                        <p className="text-lg font-bold">{movie.title}</p>
+                        <p>Release Date: {movie.release_date}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="mt-3 w-full text-right">
-                    <Button variant="light" onClick={() => setSelectedMovie(null)}>
-                      Close
-                    </Button>
-                  </div>
-                </DialogPanel>
-              </Dialog>
+                )}
+                {selectedMovie && (
+                  <Dialog open={true} onClose={() => setSelectedMovie(null)} static={true}>
+                    <DialogPanel>
+                      <div className="p-4 max-w-md mx-auto rounded-lg">
+                        <h2 className="text-lg font-bold">{selectedMovie.title}</h2>
+                        <p className="mt-1 font-medium">Release Date:
+                          <span className="font-normal inline-block ml-1">
+                            {selectedMovie.release_date}
+                          </span>
+                        </p>
+                        <p className="mt-1 font-medium">Synopsis:
+                          <span className=" font-normal block">
+                            {selectedMovie.overview}
+                          </span>
+                        </p>
+                        <p className="mt-1 font-medium">Cast:</p>
+                        <ul className="grid grid-cols-2 gap-4">
+                          {selectedMovie.credits?.cast.slice(0, 10).map((castMember: any) => (
+                            <li key={castMember.id} className="flex items-center mb-2">
+                              <img
+                                src={`https://image.tmdb.org/t/p/w200${castMember.profile_path}`}
+                                alt={castMember.name}
+                                className=" w-14 h-14 mr-2 rounded-full object-cover"
+                              />
+                              <div>
+                                <p className="font-semibold">{castMember.name}</p>
+                                <p className="text-sm">{castMember.character}</p>
+                              </div>
+                            </li>
+                          ))}
+                          {selectedMovie.credits?.cast.length > 10 && <li>and more...</li>}
+                        </ul>
+                      </div>
+                      <div className="mt-3 w-full text-right">
+                        <Button variant="light" onClick={() => setSelectedMovie(null)}>
+                          Close
+                        </Button>
+                      </div>
+                    </DialogPanel>
+                  </Dialog>
+                )}
+              </>
             )}
           </div>
+
         </div>
-        <div className="mt-4 flex justify-center gap-3 items-center">
+        <div className=" mt-6 flex justify-center gap-3 items-center">
           <button
             onClick={handlePrevPage}
             disabled={currentPage === 1}
