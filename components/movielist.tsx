@@ -218,6 +218,7 @@ export default function MovieList() {
                                                     type="radio"
                                                     name="rating"
                                                     value={index + 1}
+                                                    checked={index + 1 === selectedRatings}
                                                     onChange={() => handleRatingChange(index + 1)}
                                                     className="mr-1"
                                                 />
