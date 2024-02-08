@@ -276,7 +276,7 @@ export default function MovieList() {
                                             onClick={() => fetchMovieDetails(movie.id)}
                                         >
                                             <Badge className={`absolute -top-2 text-black right-0 ${movie.vote_average >= 7 ? 'bg-green-400' : movie.vote_average >= 5 ? 'bg-yellow-400' : 'bg-red-400'}`}>
-                                                {movie.vote_average.toFixed(1)}
+                                                {`${(movie?.vote_average * 10).toFixed(0)}%`}
                                             </Badge>
                                             <div className="">
                                                 <Image
