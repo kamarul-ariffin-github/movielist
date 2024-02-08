@@ -120,6 +120,12 @@ export default function MovieList() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
+    const handleGoToPage = (page: number) => {
+        if (currentPage > 0) {
+            setCurrentPage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     const handleGenreChange = (genreId: number) => {
         setSelectedGenres((prevGenres) => {
@@ -373,22 +379,72 @@ export default function MovieList() {
                 </div>
 
             </div>
-            <div className=" mt-6 flex justify-center gap-3 items-center">
+            <div className=" mt-6 flex justify-center gap-1 items-center">
+                {currentPage > 3 && (
+                    <button
+                        onClick={() => handleGoToPage(1)}
+                        disabled={currentPage < 4}
+                        className="px-3 py-2 bg-gray-200 rounded-md disabled:opacity-50 text-xs"
+                    >
+                        &lt;&lt;
+                    </button>
+                )}
                 <button
                     onClick={handlePrevPage}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+                    className="px-3 py-2 bg-gray-200 rounded-md disabled:opacity-50 text-xs"
                 >
-                    Previous Page
+                    &lt;
                 </button>
-                <p className="text-center">Page {currentPage} of {totalPages}</p>
+                {currentPage - 2 > 0 && (
+                    <button
+                        onClick={() => handleGoToPage(currentPage - 2)}
+                        className="px-3 py-2 hover:bg-gray-200 rounded-md text-xs"
+                    >
+                        {currentPage - 2}
+                    </button>
+                )}
+                {currentPage - 1 > 0 && (
+                    <button
+                        onClick={() => handleGoToPage(currentPage - 1)}
+                        className="px-3 py-2 hover:bg-gray-200 rounded-md text-xs"
+                    >
+                        {currentPage - 1}
+                    </button>
+                )}
+                <p className="text-center px-3 py-2 bg-gray-200 rounded-md opacity-50">{currentPage}{/*  of {totalPages} */}</p>
+                {currentPage + 1 < totalPages && (
+                    <button
+                        onClick={() => handleGoToPage(currentPage + 1)}
+                        className="px-3 py-2 hover:bg-gray-200 rounded-md text-xs"
+                    >
+                        {currentPage + 1}
+                    </button>
+                )}
+                {currentPage + 2 < totalPages && (
+                    <button
+                        onClick={() => handleGoToPage(currentPage + 2)}
+                        className="px-3 py-2 hover:bg-gray-200 rounded-md text-xs"
+                    >
+                        {currentPage + 2}
+                    </button>
+                )}
                 <button
                     onClick={handleNextPage}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-gray-200 rounded-md disabled:opacity-50"
+                    className="px-3 py-2 bg-gray-200 rounded-md disabled:opacity-50 text-xs"
                 >
-                    Next Page
+                    &gt;
                 </button>
+                {currentPage + 3 < totalPages && (
+                    <button
+                        onClick={() => handleGoToPage(totalPages)}
+                        className="px-3 py-2 bg-gray-200 rounded-md disabled:opacity-50 text-xs"
+                        disabled={currentPage === totalPages}
+                    >
+                        &gt;&gt;
+                    </button>
+                )}
             </div>
         </>
     )
