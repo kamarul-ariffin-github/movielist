@@ -129,11 +129,13 @@ export default function MovieList() {
                 return [...prevGenres, genreId];
             }
         });
+        setCurrentPage(1);
         // console.log(selectedGenres)
     };
 
     const handleRatingChange = (rating: number) => {
         setSelectedRatings(rating);
+        setCurrentPage(1);
         // console.log(rating);
     };
 
