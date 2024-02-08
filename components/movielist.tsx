@@ -130,12 +130,14 @@ export default function MovieList() {
             }
         });
         setCurrentPage(1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         // console.log(selectedGenres)
     };
 
     const handleRatingChange = (rating: number) => {
         setSelectedRatings(rating);
         setCurrentPage(1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         // console.log(rating);
     };
 
@@ -250,7 +252,7 @@ export default function MovieList() {
                             </DialogPanel>
                         </Dialog>
                         <div className="flex items-center gap-1">
-                            {/* <p className=" font-bold">Sort By</p> */}
+                            <p className=" font-bold">Sort By</p>
                             <div>
                                 <Select value={selectedSortBy} onValueChange={(value: string) => handleSortByChange(value)} >
                                     <SelectItem value="popularity">Popularity</SelectItem>
