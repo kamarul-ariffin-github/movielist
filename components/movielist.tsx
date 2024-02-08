@@ -1,5 +1,5 @@
 "use client"
-import { Button, Dialog, DialogPanel, Select, SelectItem } from "@tremor/react";
+import { Badge, Button, Dialog, DialogPanel, Select, SelectItem } from "@tremor/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { BeatLoader } from "react-spinners";
@@ -272,9 +272,12 @@ export default function MovieList() {
                                     {movies.map((movie) => (
                                         <div
                                             key={movie.id}
-                                            className="shadow-md border p-2 hover:scale-105 hover:md:scale-110 transform transition duration-300"
+                                            className="shadow-md border p-2 hover:scale-105 hover:md:scale-110 transform transition duration-300 relative"
                                             onClick={() => fetchMovieDetails(movie.id)}
                                         >
+                                            <Badge className={`absolute -top-2 text-black right-0 ${movie.vote_average >= 7 ? 'bg-green-400' : movie.vote_average >= 5 ? 'bg-yellow-400' : 'bg-red-400'}`}>
+                                                {movie.vote_average.toFixed(1)}
+                                            </Badge>
                                             <div className="">
                                                 <Image
                                                     loader={imageLoader}
